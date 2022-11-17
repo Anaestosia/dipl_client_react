@@ -46,7 +46,7 @@ class LoginPage extends React.Component {
     e.preventDefault();
 
     const { history } = this.props;
-    const {setCurrentUserId, setIsAuth} = this.context
+    const {setCurrentUserId, setIsAuth, setIsAdmin} = this.context
     const fields = ["username", "password"];
     const formElements = e.target.elements;
 
@@ -61,6 +61,8 @@ class LoginPage extends React.Component {
         const response = await AuthService.athenticate(formValues.username, formValues.password);
         localStorage.setItem("token", response.data.token);
         localStorage.setItem('user_id',response.data.user_id)
+        localStorage.setItem('is_admin',response.data.is_admin)
+        setIsAdmin(response.data.is_admin)
         setCurrentUserId(response.data.user_id)
         localStorage.setItem('auth', 'true')
         setIsAuth(true)

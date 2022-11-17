@@ -6,6 +6,7 @@ import BarChart from "@material-ui/icons/BarChart";
 import BubbleChart from "@material-ui/icons/BubbleChart";
 import LocationOn from "@material-ui/icons/LocationOn";
 import Notifications from "@material-ui/icons/Notifications";
+import Info from "@material-ui/icons/Info";
 import Unarchive from "@material-ui/icons/Unarchive";
 import Language from "@material-ui/icons/Language";
 import Register from "@material-ui/icons/GroupAdd";
@@ -48,6 +49,14 @@ const dashboardRoutes = [
     rtlName: "طباعة",
     icon: BarChart,
     component: Typography,
+    layout: "/admin"
+  },
+  {
+    path: "/achievements",
+    name: "Достижения",
+    rtlName: "إخطارات",
+    icon: Info,
+    component: NotificationsPage,
     layout: "/admin"
   },
   {

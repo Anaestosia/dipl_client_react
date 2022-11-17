@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React from "react";
+import React, {useState, useEffect} from "react";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 // @material-ui/icons
@@ -10,9 +10,15 @@ import GridContainer from "components/Grid/GridContainer.jsx";
 import Button from "components/CustomButtons/Button.jsx";
 import SnackbarContent from "components/Snackbar/SnackbarContent.jsx";
 import Snackbar from "components/Snackbar/Snackbar.jsx";
+import CheckBox from "@material-ui/icons/CheckBox";
 import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
+import CardIcon from "components/Card/CardIcon.jsx";
 import CardBody from "components/Card/CardBody.jsx";
+import CardFooter from "components/Card/CardFooter.jsx";
+import AchievementService from "../../API/AchievementService";
+import Accessibility from "@material-ui/icons/Accessibility";
+import Info from "@material-ui/icons/Info";
 
 const styles = {
   cardCategoryWhite: {
@@ -44,257 +50,71 @@ const styles = {
   }
 };
 
-class Notifications extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      tl: false,
-      tc: false,
-      tr: false,
-      bl: false,
-      bc: false,
-      br: false
-    };
+const Notifications = (props) => {
+  const { classes } = props;
+  const [ach, setAch] = useState([])
+  const [isLoad, setIsLoad] = useState(true)
+
+  useEffect(()=>{
+      const fetchAch = async ()=>{
+        try{
+          const response = await AchievementService.getAll()
+          setAch(response.data.data.data)
+          console.log(response.data.data.data)
+          setIsLoad(false)
+        }
+        catch(e){
+          console.log(e)
+          setIsLoad(false)
+        }
+      }
+
+      fetchAch()
   }
-  // to stop the warning of calling setState of unmounted component
-  componentWillUnmount() {
-    var id = window.setTimeout(null, 0);
-    while (id--) {
-      window.clearTimeout(id);
-    }
-  }
-  showNotification(place) {
-    var x = [];
-    x[place] = true;
-    this.setState(x);
-    this.alertTimeout = setTimeout(
-      function() {
-        x[place] = false;
-        this.setState(x);
-      }.bind(this),
-      6000
-    );
-  }
-  render() {
-    const { classes } = this.props;
-    return (
+      ,[])
+
+  return(
       <Card>
         <CardHeader color="primary">
-          <h4 className={classes.cardTitleWhite}>Notifications</h4>
+          <h4 className={classes.cardTitleWhite}>Достижения</h4>
           <p className={classes.cardCategoryWhite}>
-            Handcrafted by our friends from{" "}
-            <a target="_blank" href="https://material-ui-next.com/">
-              Material UI
-            </a>{" "}
-            and styled by{" "}
-            <a target="_blank" href="https://www.creative-tim.com/">
-              Creative Tim
-            </a>
-            . Please checkout the{" "}
-            <a href="#pablo" target="_blank">
-              full documentation
-            </a>
-            .
+            Виды достижений и количество баллов к начислению работнику за каждое достижение
           </p>
         </CardHeader>
         <CardBody>
           <GridContainer>
-            <GridItem xs={12} sm={12} md={6}>
-              <h5>Notifications Style</h5>
-              <br />
-              <SnackbarContent message={"This is a plain notification"} />
-              <SnackbarContent
-                message={"This is a notification with close button."}
-                close
-              />
-              <SnackbarContent
-                message={"This is a notification with close button and icon."}
-                close
-                icon={AddAlert}
-              />
-              <SnackbarContent
-                message={
-                  "This is a notification with close button and icon and have many lines. You can see that the icon and the close button are always vertically aligned. This is a beautiful notification. So you don't have to worry about the style."
-                }
-                close
-                icon={AddAlert}
-              />
-            </GridItem>
-            <GridItem xs={12} sm={12} md={6}>
-              <h5>Notifications States</h5>
-              <br />
-              <SnackbarContent
-                message={
-                  'INFO - This is a regular notification made with color="info"'
-                }
-                close
-                color="info"
-              />
-              <SnackbarContent
-                message={
-                  'SUCCESS - This is a regular notification made with color="success"'
-                }
-                close
-                color="success"
-              />
-              <SnackbarContent
-                message={
-                  'WARNING - This is a regular notification made with color="warning"'
-                }
-                close
-                color="warning"
-              />
-              <SnackbarContent
-                message={
-                  'DANGER - This is a regular notification made with color="danger"'
-                }
-                close
-                color="danger"
-              />
-              <SnackbarContent
-                message={
-                  'PRIMARY - This is a regular notification made with color="primary"'
-                }
-                close
-                color="primary"
-              />
-            </GridItem>
+            {
+              isLoad ?
+                  "Загрузка..."
+                  :
+              ach.map((a)=>
+              <>
+              <GridItem xs={12} sm={12} md={4}>
+              <Card >
+              <CardHeader color="info" stats icon style={{color: "black"}}>
+              <CardIcon color="primary" style={{color: "white"}}>
+              <CheckBox />
+              </CardIcon>
+              <p className={classes.cardCategory}>{a.attributes.name}</p>
+              Баллы: <h2 className={classes.cardTitle}>{a.attributes.points}</h2>
+              </CardHeader>
+              <CardFooter stats>
+              <div className={classes.stats}>
+              <Info />
+            {a.attributes.description}
+              </div>
+              </CardFooter>
+              </Card>
+              </GridItem>
+              </>
+              )
+            }
           </GridContainer>
-          <br />
-          <br />
-          <GridContainer justify="center">
-            <GridItem xs={12} sm={12} md={6} style={{ textAlign: "center" }}>
-              <h5>
-                Notifications Places
-                <br />
-                <small>Click to view notifications</small>
-              </h5>
-            </GridItem>
-          </GridContainer>
-          <GridContainer justify="center">
-            <GridItem xs={12} sm={12} md={10} lg={8}>
-              <GridContainer>
-                <GridItem xs={12} sm={12} md={4}>
-                  <Button
-                    fullWidth
-                    color="primary"
-                    onClick={() => this.showNotification("tl")}
-                  >
-                    Top Left
-                  </Button>
-                  <Snackbar
-                    place="tl"
-                    color="info"
-                    icon={AddAlert}
-                    message="Welcome to MATERIAL DASHBOARD React - a beautiful freebie for every web developer."
-                    open={this.state.tl}
-                    closeNotification={() => this.setState({ tl: false })}
-                    close
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={4}>
-                  <Button
-                    fullWidth
-                    color="primary"
-                    onClick={() => this.showNotification("tc")}
-                  >
-                    Top Center
-                  </Button>
-                  <Snackbar
-                    place="tc"
-                    color="info"
-                    icon={AddAlert}
-                    message="Welcome to MATERIAL DASHBOARD React - a beautiful freebie for every web developer."
-                    open={this.state.tc}
-                    closeNotification={() => this.setState({ tc: false })}
-                    close
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={4}>
-                  <Button
-                    fullWidth
-                    color="primary"
-                    onClick={() => this.showNotification("tr")}
-                  >
-                    Top Right
-                  </Button>
-                  <Snackbar
-                    place="tr"
-                    color="info"
-                    icon={AddAlert}
-                    message="Welcome to MATERIAL DASHBOARD React - a beautiful freebie for every web developer."
-                    open={this.state.tr}
-                    closeNotification={() => this.setState({ tr: false })}
-                    close
-                  />
-                </GridItem>
-              </GridContainer>
-            </GridItem>
-          </GridContainer>
-          <GridContainer justify={"center"}>
-            <GridItem xs={12} sm={12} md={10} lg={8}>
-              <GridContainer>
-                <GridItem xs={12} sm={12} md={4}>
-                  <Button
-                    fullWidth
-                    color="primary"
-                    onClick={() => this.showNotification("bl")}
-                  >
-                    Bottom Left
-                  </Button>
-                  <Snackbar
-                    place="bl"
-                    color="info"
-                    icon={AddAlert}
-                    message="Welcome to MATERIAL DASHBOARD React - a beautiful freebie for every web developer."
-                    open={this.state.bl}
-                    closeNotification={() => this.setState({ bl: false })}
-                    close
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={4}>
-                  <Button
-                    fullWidth
-                    color="primary"
-                    onClick={() => this.showNotification("bc")}
-                  >
-                    Bottom Center
-                  </Button>
-                  <Snackbar
-                    place="bc"
-                    color="info"
-                    icon={AddAlert}
-                    message="Welcome to MATERIAL DASHBOARD React - a beautiful freebie for every web developer."
-                    open={this.state.bc}
-                    closeNotification={() => this.setState({ bc: false })}
-                    close
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={4}>
-                  <Button
-                    fullWidth
-                    color="primary"
-                    onClick={() => this.showNotification("br")}
-                  >
-                    Bottom Right
-                  </Button>
-                  <Snackbar
-                    place="br"
-                    color="info"
-                    icon={AddAlert}
-                    message="Welcome to MATERIAL DASHBOARD React - a beautiful freebie for every web developer."
-                    open={this.state.br}
-                    closeNotification={() => this.setState({ br: false })}
-                    close
-                  />
-                </GridItem>
-              </GridContainer>
-            </GridItem>
-          </GridContainer>
+
         </CardBody>
       </Card>
-    );
-  }
+  );
+
 }
 
 export default withStyles(styles)(Notifications);

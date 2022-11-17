@@ -11,13 +11,14 @@ import "./assets/css/common.css"
 const App = () => {
     const [isAuth, setIsAuth] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
-
+    const [isAdmin, setIsAdmin] = useState(false)
 
     useEffect( ()=> {
             setIsAuth(false)
             if(localStorage.getItem('auth'))
             {
                 setIsAuth(true)
+                setIsAdmin(Boolean(localStorage.getItem('is_admin')))
                 setCurrentUserId(localStorage.getItem('user_id'))
             }
         }
@@ -38,7 +39,6 @@ const App = () => {
 
 
 
-
     return (
         <Switch>
             <AuthContext.Provider value={{
@@ -46,7 +46,9 @@ const App = () => {
                 setIsAuth,
                 currentUserId,
                 setCurrentUserId,
-                logOut
+                logOut,
+                isAdmin,
+                setIsAdmin
             }}>
                 <>
                     {
@@ -54,7 +56,7 @@ const App = () => {
                             <>
                                 <Route path="/admin" component={Admin} />
                                 <Route path="/rtl" component={RTL} />
-                                <Redirect from="/" to="/admin/user" />
+                                <Redirect from="/" to="/admin/workers" />
                             </>
                             :
                             <>
