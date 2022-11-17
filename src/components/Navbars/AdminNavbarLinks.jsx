@@ -139,6 +139,15 @@ class HeaderLinks extends React.Component {
 
                       </MenuItem>
                       <MenuItem
+                          style={{fontSize: "12px", color: "white", marginLeft: "8px"}}
+                      >
+                        <a href="http://localhost:3000/graphiql/" target="_blank"
+                        >
+                          GraphQL UI
+                        </a>
+
+                      </MenuItem>
+                      <MenuItem
                           onClick={this.logout}
                         className={classes.dropdownItem}
                       >

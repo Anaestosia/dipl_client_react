@@ -14,12 +14,16 @@ import IconButton from "@material-ui/core/IconButton";
 import Done from "@material-ui/icons/Done";
 import Error from "@material-ui/icons/Error";
 import PhotoCamera from "@material-ui/icons/PhotoCamera";
+import Group from "@material-ui/icons/Group";
+import ShowChart from "@material-ui/icons/ShowChart";
 import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardAvatar from "components/Card/CardAvatar.jsx";
 import CardBody from "components/Card/CardBody.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
+import CardIcon from "components/Card/CardIcon.jsx";
 // import "../../assets/css/common.css"
+
 
 import UserService from "../../API/UserService";
 import AuthService from "../../API/AuthService";
@@ -57,6 +61,7 @@ const UserProfile = (props) => {
       query($id: ID!) {
       user(id: $id){
         email
+        workersCount
         departament{
           name
           description
@@ -149,6 +154,7 @@ const UserProfile = (props) => {
 
   useEffect(()=>{
     if(data !== undefined){
+        console.log(data.user)
       setUser(data.user)
     }
   },
@@ -189,79 +195,103 @@ const UserProfile = (props) => {
             <div>
               <GridContainer>
                 <GridItem xs={12} sm={12} md={8}>
-                  <form onSubmit={updateProfile}>
-                    <Card>
-                      <CardHeader color="primary">
-                        <h4 className="cardTitleWhite">Редактировать профиль</h4>
-                        <p className="cardCategoryWhite">
-                          Введите новые данные профиля
-                        </p>
-                      </CardHeader>
-                      <CardBody>
-                        <GridContainer>
-                          <GridItem xs={12} sm={12} md={3}>
-                            <CustomInput
-                                labelText="Email"
-                                id="email"
-                                formControlProps={{
-                                  fullWidth: true
-                                }}
-                                inputProps={{
-                                  required: true,
-                                  defaultValue: name,
-                                  name: "email"
-                                }}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4}>
-                            <CustomInput
-                                labelText="Старый пароль"
-                                id="old_password"
-                                formControlProps={{
-                                  fullWidth: true
-                                }}
-                                inputProps={{
-                                  required: true,
-                                  defaultValue: name,
-                                  name: "old_password"
-                                }}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4}>
-                            <CustomInput
-                                labelText="Пароль"
-                                id="password"
-                                formControlProps={{
-                                  fullWidth: true
-                                }}
-                                inputProps={{
-                                  required: true,
-                                  defaultValue: email,
-                                  name: "password"
-                                }}
-                            />
-                          </GridItem>
-                        </GridContainer>
-                      </CardBody>
-                      <CardFooter>
-                        <Button type="submit" color="primary">
-                          Обновить данные
-                          <input
-                              type="file"
-                              hidden
-                          />
-                        </Button>
-                        {/*<Button*/}
-                        {/*    fullWidth*/}
-                        {/*    color="primary"*/}
-                        {/*    onClick={() => showNotification("bc")}*/}
-                        {/*>*/}
-                        {/*  Top Center*/}
-                        {/*</Button>*/}
-                      </CardFooter>
-                    </Card>
-                  </form>
+                    <GridContainer>
+                        <GridItem xs={12} sm={12} md={12}>
+                            <form onSubmit={updateProfile}>
+                            <Card>
+                                <CardHeader color="primary">
+                                    <h4 className="cardTitleWhite">Редактировать профиль</h4>
+                                    <p className="cardCategoryWhite">
+                                        Введите новые данные профиля
+                                    </p>
+                                </CardHeader>
+                                <CardBody>
+                                    <GridContainer>
+                                        <GridItem xs={12} sm={12} md={3}>
+                                            <CustomInput
+                                                labelText="Email"
+                                                id="email"
+                                                formControlProps={{
+                                                    fullWidth: true
+                                                }}
+                                                inputProps={{
+                                                    required: true,
+                                                    defaultValue: name,
+                                                    name: "email"
+                                                }}
+                                            />
+                                        </GridItem>
+                                        <GridItem xs={12} sm={12} md={4}>
+                                            <CustomInput
+                                                labelText="Старый пароль"
+                                                id="old_password"
+                                                formControlProps={{
+                                                    fullWidth: true
+                                                }}
+                                                inputProps={{
+                                                    required: true,
+                                                    defaultValue: name,
+                                                    name: "old_password"
+                                                }}
+                                            />
+                                        </GridItem>
+                                        <GridItem xs={12} sm={12} md={4}>
+                                            <CustomInput
+                                                labelText="Пароль"
+                                                id="password"
+                                                formControlProps={{
+                                                    fullWidth: true
+                                                }}
+                                                inputProps={{
+                                                    required: true,
+                                                    defaultValue: email,
+                                                    name: "password"
+                                                }}
+                                            />
+                                        </GridItem>
+                                    </GridContainer>
+                                </CardBody>
+                                <CardFooter>
+                                    <Button type="submit" color="primary">
+                                        Обновить данные
+                                        <input
+                                            type="file"
+                                            hidden
+                                        />
+                                    </Button>
+                                    {/*<Button*/}
+                                    {/*    fullWidth*/}
+                                    {/*    color="primary"*/}
+                                    {/*    onClick={() => showNotification("bc")}*/}
+                                    {/*>*/}
+                                    {/*  Top Center*/}
+                                    {/*</Button>*/}
+                                </CardFooter>
+                            </Card>
+                        </form>
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={8}>
+                            <Card>
+                            <CardHeader color="primary" stats icon style={{color: "black"}}>
+                                <CardIcon color="primary" style={{color: "white"}}>
+                                    <Group />
+                                </CardIcon>
+                                <p className={classes.cardCategory}>Работники "{user.departament.name}"</p>
+                                <h3 className={classes.cardTitle}>{user.workersCount}</h3>
+                            </CardHeader>
+                            <CardFooter stats>
+                                <div className={classes.stats}>
+                                    <ShowChart />
+                                    Количество подчиненных работников
+                                </div>
+                            </CardFooter>
+                        </Card>
+                        </GridItem>
+
+                    </GridContainer>
                 </GridItem>
+
+
                 <GridItem xs={12} sm={12} md={4}>
                   <Card profile>
                     <CardAvatar profile>
