@@ -4,11 +4,15 @@ import PropTypes from "prop-types";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 // core components
+import SnackbarContent from "components/Snackbar/SnackbarContent.jsx";
+import Snackbar from "components/Snackbar/Snackbar.jsx";
 import GridItem from "components/Grid/GridItem.jsx";
 import GridContainer from "components/Grid/GridContainer.jsx";
 import CustomInput from "components/CustomInput/CustomInput.jsx";
 import Button from "components/CustomButtons/Button.jsx";
 import IconButton from "@material-ui/core/IconButton";
+import Done from "@material-ui/icons/Done";
+import Error from "@material-ui/icons/Error";
 import PhotoCamera from "@material-ui/icons/PhotoCamera";
 import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
@@ -20,7 +24,7 @@ import CardFooter from "components/Card/CardFooter.jsx";
 import UserService from "../../API/UserService";
 import AuthService from "../../API/AuthService";
 import {AuthContext} from "../../contexts/AuthContext";
-import { useQuery, gql } from '@apollo/client';
+import { useQuery,useMutation, gql } from '@apollo/client';
 
 const styles = {
   cardCategoryWhite: {
@@ -45,20 +49,9 @@ const UserProfile = (props) => {
   const {currentUserId} = useContext(AuthContext)
   const [user, setUser] = useState(null)
   const { classes, name, email } = props;
-
-  const updateProfile = (e) => {
-    e.preventDefault();
-
-    const fields = ["email", "password"];
-    const formElements = e.target.elements;
-    const formValues = fields
-        .map(field => ({
-          [field]: formElements.namedItem(field).value
-        }))
-        .reduce((current, next) => ({ ...current, ...next }));
-
-    console.log(formValues)
-  }
+  const [bc, setBc] = useState(false)
+  const [bcError, setBcError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
   const GET_USER_DATA = gql`
       query($id: ID!) {
@@ -77,131 +70,245 @@ const UserProfile = (props) => {
       }
     }
   `;
+  const CHANGE_USER_IMAGE = gql`
+      mutation($imageUrl: String!, $userId: Int!) {
+        changeOrCreateUserImage(imageUrl: $imageUrl, userId: $userId){
+          workerImage{
+            imageUrl 
+          }
+        }
+      }
+  `;
+  const CHANGE_USER_CREDS = gql`
+      mutation($userId: Int!, $email: String!, $currentPassword: String!, $password: String!) {
+        changeUserCreds(userId: $userId, email: $email, currentPassword: $currentPassword, password: $password){
+          errors
+          user{
+            email 
+          }
+        }
+      }
+  `;
+
+  const { loading, error, data } = useQuery(GET_USER_DATA,{variables: {id: currentUserId}});
+  const [changeImage, { dataImage, loadingImage, errorImage }] = useMutation(CHANGE_USER_IMAGE);
+  const [changeCreds, {dataCreds, loadingCreds, errorCreds}] = useMutation(CHANGE_USER_CREDS)
 
   const upload = (e) => {
-    const data = new FormData()
-    data.append("file", e.target.files[0])
-    data.append("upload_preset", "zzpmbswm")
-    data.append("cloud_name","drntpsmxs")
+    const dataRaw = new FormData()
+    dataRaw.append("file", e.target.files[0])
+    dataRaw.append("upload_preset", "zzpmbswm")
+    dataRaw.append("cloud_name","drntpsmxs")
     fetch("https://api.cloudinary.com/v1_1/drntpsmxs/image/upload",{
       method:"post",
-      body: data
+      body: dataRaw
     })
         .then(resp => resp.json())
-        .then(data => {
-          // this.setState({image_url: data.url})
+        .then(imageData => {
+          changeImage({variables: {imageUrl: imageData.url, userId: parseInt(currentUserId)}})
+          if(errorImage)
+          {console.log("Error while changing image: ", errorImage)}
+          else{
+            setUser(prevUser => ({...prevUser, workerImage: {...prevUser.workerImage, imageUrl: imageData.url}}))
+            showNotification("bc")
+          }
         })
         .catch(err => console.log(err))
   }
 
-  const { loading, error, data } = useQuery(GET_USER_DATA,{variables: {id: currentUserId}});
+  const updateProfile = async (e) => {
+      e.preventDefault();
+
+      const fields = ["email", "old_password", "password"];
+      const formElements = e.target.elements;
+      const formValues = fields
+          .map(field => ({
+              [field]: formElements.namedItem(field).value
+          }))
+          .reduce((current, next) => ({...current, ...next}));
+
+      try {
+      const dataCred = await changeCreds({
+          variables: {
+              userId: parseInt(currentUserId),
+              email: formValues.email,
+              currentPassword: formValues.old_password,
+              password: formValues.password
+          }
+      })
+          setUser(prevUser => ({...prevUser, email: formValues.email}))
+          showNotification("bc")
+      }
+      catch (e){
+          showNotification("bcError")
+          setErrorMessage(e.message)
+      }
+
+  }
+
 
   useEffect(()=>{
-        const fetchUser = async () => {
-          try {
-            const response = await UserService.getUser(currentUserId);
-            //console.log(response)
-            setUser(response.data.data.data)
-            // this.setState({"email": response.data.data.data.attributes.email})
-            // this.setState({"role_name": response.data.data.data.relationships.role.meta.role_name})
-            // this.setState({"departament_name": response.data.data.data.relationships.departament.meta.departament_name})
-            // this.setState({"departament_desc": response.data.data.data.relationships.departament.meta.departament_desc})
-            // this.setState({"image_url": response.data.data.data.relationships.worker_image.meta.image_url})
-          } catch (e) {
-            console.log(e)
-          }
-        }
-        fetchUser()
-        console.log(error)
-      },
-      [])
+    if(data !== undefined){
+      setUser(data.user)
+    }
+  },
+  [data])
 
-  if (loading) return null;
-  if (error) return `Error! ${error}`;
+  const showNotification =(place) => {
+      if(place === "bcError")
+      {
+      setBcError(true)
+      setTimeout(
+          function () {
+              setBcError(false)
+          }.bind(this),
+          4000
+      );
+      }
+          else
+      {
+          setBc(true)
+          setTimeout(
+              function () {
+                  setBc(false)
+              }.bind(this),
+              4000
+          );
+      }
+  }
+
+  if (loading || loading===undefined) return `Загрузка...`;
+  if (error ) return `Error! ${error}`;
   return (
       <>
-        <div>
-          <GridContainer>
-            <GridItem xs={12} sm={12} md={8}>
-              <form onSubmit={updateProfile}>
-                <Card>
-                  <CardHeader color="primary">
-                    <h4 className="cardTitleWhite">Редактировать профиль</h4>
-                    <p className="cardCategoryWhite">
-                      Введите новые данные профиля
-                    </p>
-                  </CardHeader>
-                  <CardBody>
-                    <GridContainer>
-                      <GridItem xs={12} sm={12} md={3}>
-                        <CustomInput
-                            labelText="Email"
-                            id="email"
-                            formControlProps={{
-                              fullWidth: true
-                            }}
-                            inputProps={{
-                              required: true,
-                              defaultValue: name,
-                              name: "email"
-                            }}
-                        />
-                      </GridItem>
-                      <GridItem xs={12} sm={12} md={4}>
-                        <CustomInput
-                            labelText="Пароль"
-                            id="password"
-                            formControlProps={{
-                              fullWidth: true
-                            }}
-                            inputProps={{
-                              required: true,
-                              defaultValue: email,
-                              name: "password"
-                            }}
-                        />
-                      </GridItem>
-                    </GridContainer>
-                  </CardBody>
-                  <CardFooter>
-                    <Button type="submit" color="primary">
-                      Обновить данные
-                      <input
-                          type="file"
-                          hidden
-                      />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </form>
-            </GridItem>
-            <GridItem xs={12} sm={12} md={4}>
-              <Card profile>
-                <CardAvatar profile>
-                  <a href="#pablo" onClick={e => e.preventDefault()}>
-                    <img src={data.user.workerImage.imageUrl} alt="..."  />
-                  </a>
-                </CardAvatar>
-                <div>
-                  <IconButton size="large" color="primary" aria-label="upload picture" component="label">
-                    <input hidden accept="image/*" type="file" name="images" onChange={upload}  />
-                    <PhotoCamera  size="lg" />
-                  </IconButton>
-                </div>
-                <CardBody profile>
-                  <h7 className={classes.cardCategory}>{data.user.role.name}: {data.user.email}</h7>
-                  <h4 className={classes.cardTitle}>{data.user.departament.name}</h4>
-                  <p className={classes.description}>
-                    {data.user.departament.description}
-                  </p>
-                </CardBody>
-              </Card>
-            </GridItem>
-          </GridContainer>
-        </div>
+        {
+          user === null
+            ?
+            null
+            :
+            <div>
+              <GridContainer>
+                <GridItem xs={12} sm={12} md={8}>
+                  <form onSubmit={updateProfile}>
+                    <Card>
+                      <CardHeader color="primary">
+                        <h4 className="cardTitleWhite">Редактировать профиль</h4>
+                        <p className="cardCategoryWhite">
+                          Введите новые данные профиля
+                        </p>
+                      </CardHeader>
+                      <CardBody>
+                        <GridContainer>
+                          <GridItem xs={12} sm={12} md={3}>
+                            <CustomInput
+                                labelText="Email"
+                                id="email"
+                                formControlProps={{
+                                  fullWidth: true
+                                }}
+                                inputProps={{
+                                  required: true,
+                                  defaultValue: name,
+                                  name: "email"
+                                }}
+                            />
+                          </GridItem>
+                          <GridItem xs={12} sm={12} md={4}>
+                            <CustomInput
+                                labelText="Старый пароль"
+                                id="old_password"
+                                formControlProps={{
+                                  fullWidth: true
+                                }}
+                                inputProps={{
+                                  required: true,
+                                  defaultValue: name,
+                                  name: "old_password"
+                                }}
+                            />
+                          </GridItem>
+                          <GridItem xs={12} sm={12} md={4}>
+                            <CustomInput
+                                labelText="Пароль"
+                                id="password"
+                                formControlProps={{
+                                  fullWidth: true
+                                }}
+                                inputProps={{
+                                  required: true,
+                                  defaultValue: email,
+                                  name: "password"
+                                }}
+                            />
+                          </GridItem>
+                        </GridContainer>
+                      </CardBody>
+                      <CardFooter>
+                        <Button type="submit" color="primary">
+                          Обновить данные
+                          <input
+                              type="file"
+                              hidden
+                          />
+                        </Button>
+                        {/*<Button*/}
+                        {/*    fullWidth*/}
+                        {/*    color="primary"*/}
+                        {/*    onClick={() => showNotification("bc")}*/}
+                        {/*>*/}
+                        {/*  Top Center*/}
+                        {/*</Button>*/}
+                      </CardFooter>
+                    </Card>
+                  </form>
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4}>
+                  <Card profile>
+                    <CardAvatar profile>
+                      <a href="#pablo" onClick={e => e.preventDefault()}>
+                        <img src={ user.workerImage.imageUrl} alt="..."  />
+                      </a>
+                    </CardAvatar>
+                    <div>
+                      <IconButton size="large" color="primary" aria-label="upload picture" component="label">
+                        <input hidden accept="image/*" type="file" name="images" onChange={upload}  />
+                        <PhotoCamera  size="lg" />
+                      </IconButton>
+                    </div>
+                    <CardBody profile>
+                      <h7 className={classes.cardCategory}>{user.role.name}: {user.email}</h7>
+                      <h4 className={classes.cardTitle}>{user.departament.name}</h4>
+                      <p className={classes.description}>
+                        {user.departament.description}
+                      </p>
+                    </CardBody>
+                  </Card>
+                </GridItem>
+              </GridContainer>
+              <Snackbar
+                  place="bc"
+                  color="success"
+                  message="Готово"
+                  open={bc}
+                  icon={Done}
+                  closeNotification={() => setBc(false)}
+                  close
+              />
+              <Snackbar
+                  place="bc"
+                  color="danger"
+                  message={errorMessage}
+                  open={bcError}
+                  icon={Error}
+                  closeNotification={() => setBcError(false)}
+                  close
+              />
+            </div>
+
+        }
+
       </>
   )
-
 }
 
 UserProfile.propTypes = {

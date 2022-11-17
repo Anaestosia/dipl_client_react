@@ -3,13 +3,13 @@ import { hexToRgb, blackColor } from "assets/jss/material-dashboard-react.jsx";
 const cardAvatarStyle = {
   cardAvatar: {
     "&$cardAvatarProfile img": {
-      width: "100%",
-      height: "auto"
+      width: "200px",
+      height: "auto",
     }
   },
   cardAvatarProfile: {
-    maxWidth: "200px",
-    maxHeight: "200px",
+    width: "200px",
+    height: "200px",
     margin: "-50px auto 0",
     borderRadius: "50%",
     overflow: "hidden",
