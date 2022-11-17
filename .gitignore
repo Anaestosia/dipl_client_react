@@ -9,6 +9,9 @@
 # production
 /build
 
+# draft to work
+draft.rb
+
 # npmjs
 /dist
 
