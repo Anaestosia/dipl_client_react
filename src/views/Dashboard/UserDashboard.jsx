@@ -130,9 +130,7 @@ const UserDashboard = (props) =>{
                                 </p>
                             </GridItem>
                             <GridItem xs={12} sm={3} md={3}>
-                                <p>
-                                Баллы минимальной премии: <b>{minPremium ? minPremium.attributes.score : null}</b>
-                                </p>
+
                             </GridItem>
                         </GridContainer>
                     </CardHeader>
@@ -149,14 +147,7 @@ const UserDashboard = (props) =>{
                             :
 
                             <CardBody>
-                                <GridContainer >
-                                    <GridItem xs={12} sm={2} md={2}>
-                                        <SearchedBar  query={query} setQuery={setQuery} />
-                                    </GridItem>
-                                    <GridItem xs={12} sm={3} md={3}>
-                                        <SortBar  sort={sort} setSort={setSort} />
-                                    </GridItem>
-                                </GridContainer>
+
 
                                 <GridContainer >
                                     {

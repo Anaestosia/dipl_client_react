@@ -156,10 +156,7 @@ export default function WAModal({open, setOpen, w, minPremium, waAdded, setWaAdd
             </DialogContentText>
             </DialogContent>
             <DialogActions>
-                <Badge badgeContent={sumPoint} color="error" style={{marginRight: "20px"}}>
-                    Сумма баллов
-                    <Paid  style={{marginLeft: "10px"}}/>
-                </Badge>
+
 
                 {
                     isAdmin || !ifPointsGreaterMinScore(sumPoint) ?

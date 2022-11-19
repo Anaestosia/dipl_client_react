@@ -41,14 +41,14 @@ const dashboardRoutes = [
   //   component: Typography,
   //   layout: "/admin"
   // },
-  {
-    path: "/achievements",
-    name: "Достижения",
-    rtlName: "إخطارات",
-    icon: Info,
-    component: NotificationsPage,
-    layout: "/admin"
-  },
+  // {
+  //   path: "/achievements",
+  //   name: "Достижения",
+  //   rtlName: "إخطارات",
+  //   icon: Info,
+  //   component: NotificationsPage,
+  //   layout: "/admin"
+  // },
   {
     path: "/user",
     name: "Личный профиль",
