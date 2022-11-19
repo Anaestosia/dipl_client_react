@@ -18,7 +18,10 @@ const App = () => {
             if(localStorage.getItem('auth'))
             {
                 setIsAuth(true)
-                setIsAdmin(Boolean(localStorage.getItem('is_admin')))
+                localStorage.getItem('is_admin') === 'true' ?
+                    setIsAdmin(true)
+                    :
+                    setIsAdmin(false)
                 setCurrentUserId(localStorage.getItem('user_id'))
             }
         }
@@ -55,7 +58,6 @@ const App = () => {
                         isAuth ?
                             <>
                                 <Route path="/admin" component={Admin} />
-                                <Route path="/rtl" component={RTL} />
                                 <Redirect from="/" to="/admin/workers" />
                             </>
                             :

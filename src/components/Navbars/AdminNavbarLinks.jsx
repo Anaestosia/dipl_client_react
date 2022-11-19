@@ -48,6 +48,9 @@ class HeaderLinks extends React.Component {
     this.setState({ open: false, profilePopupOpen: false });
   };
 
+
+
+
   logout = async () => {
     const {logOut} =this.context;
     logOut()
@@ -56,28 +59,10 @@ class HeaderLinks extends React.Component {
   render() {
     const { classes } = this.props;
     const { open, profilePopupOpen } = this.state;
+    const {isAdmin} = this.context;
+
     return (
       <div>
-        <div className={classes.searchWrapper}>
-          <CustomInput
-            formControlProps={{
-              className: classes.margin + " " + classes.search
-            }}
-            inputProps={{
-              placeholder: "Поиск",
-              inputProps: {
-                "aria-label": "Search"
-              }
-            }}
-          />
-          <Button color="white" aria-label="edit" justIcon round>
-            <Search />
-          </Button>
-        </div>
-
-
-
-
 
         <div className={classes.manager}>
           <Button
@@ -121,23 +106,39 @@ class HeaderLinks extends React.Component {
                 <Paper>
                   <ClickAwayListener onClickAway={this.handleClose}>
                     <MenuList role="menu" >
-                      <NavLink to="/admin/user">
-                      <MenuItem
-                        onClick={this.handleClose}
-                        className={classes.dropdownItem}
-                      >Профиль
-                      </MenuItem>
-                      </NavLink>
 
-                      <MenuItem
-                          style={{fontSize: "12px", color: "white", marginLeft: "8px"}}
-                      >
-                        <a href="http://localhost:3000/admin/" target="_blank"
-                           >
-                          Администрирование
-                        </a>
+                      {
+                        isAdmin ?
+                            null
+                            :
+                            <NavLink to="/admin/user">
+                              <MenuItem
+                                  onClick={this.handleClose}
+                                  className={classes.dropdownItem}
+                              >Профиль
+                              </MenuItem>
+                            </NavLink>
+                      }
 
-                      </MenuItem>
+
+                      {
+                        !isAdmin ?
+                            null
+                            :
+                            <MenuItem
+                                style={{fontSize: "12px", color: "white", marginLeft: "8px"}}
+                            >
+                              <a href="http://localhost:3000/admin/" target="_blank"
+                              >
+                                Администрирование
+                              </a>
+
+                            </MenuItem>
+                      }
+                      {
+                        !isAdmin ?
+                            null
+                            :
                       <MenuItem
                           style={{fontSize: "12px", color: "white", marginLeft: "8px"}}
                       >
@@ -147,6 +148,7 @@ class HeaderLinks extends React.Component {
                         </a>
 
                       </MenuItem>
+                      }
                       <MenuItem
                           onClick={this.logout}
                         className={classes.dropdownItem}

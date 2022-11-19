@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useContext} from "react";
 import classNames from "classnames";
 import PropTypes from "prop-types";
 import { NavLink } from "react-router-dom";
@@ -13,12 +13,14 @@ import Icon from "@material-ui/core/Icon";
 // core components
 import AdminNavbarLinks from "components/Navbars/AdminNavbarLinks.jsx";
 import RTLNavbarLinks from "components/Navbars/RTLNavbarLinks.jsx";
-
+import {AuthContext} from "../../contexts/AuthContext";
 import sidebarStyle from "assets/jss/material-dashboard-react/components/sidebarStyle.jsx";
 
 const Sidebar = ({ ...props }) => {
   // verifies if routeName is the one active (in browser input)
-  function activeRoute(routeName) {
+  const {isAdmin} = useContext(AuthContext)
+
+    function activeRoute(routeName) {
     return props.location.pathname.indexOf(routeName) > -1 ? true : false;
   }
   const { classes, color, logo, image, logoText, routes } = props;
@@ -30,6 +32,13 @@ const Sidebar = ({ ...props }) => {
         if (prop.path === "/login-page") {
           return <></>
         }
+      if (prop.path === "/user" && isAdmin) {
+          return <></>
+      }
+          if (prop.path === "/bids" && !isAdmin) {
+              return <></>
+          }
+
           listItemClasses = classNames({
             [" " + classes[color]]: activeRoute(prop.layout + prop.path)
           });
